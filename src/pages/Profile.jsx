@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 export default function Profile() {
@@ -11,21 +12,24 @@ export default function Profile() {
         <p>{currentUser.bio}</p>
 
         <div className="stats-row">
-          <div className="stat-box">
+          <Link className="stat-box stat-box-link" to="/saved">
             <strong>{savedEventIds.length}</strong>
-            <span>Saved</span>
-          </div>
-          <div className="stat-box">
+            <span className="stat-label">Saved events</span>
+            <span className="stat-help">Bookmarks to revisit</span>
+          </Link>
+          <Link className="stat-box stat-box-link" to="/joined">
             <strong>{joinedEventIds.length}</strong>
-            <span>Joined</span>
-          </div>
-          <div className="stat-box">
+            <span className="stat-label">Joined events</span>
+            <span className="stat-help">Sessions you RSVPed to</span>
+          </Link>
+          <a className="stat-box stat-box-link" href="#interest-tags">
             <strong>{currentUser.interests.length}</strong>
-            <span>Interests</span>
-          </div>
+            <span className="stat-label">Interest tags</span>
+            <span className="stat-help">Topics below tune recommendations</span>
+          </a>
         </div>
 
-        <div className="top-gap">
+        <div className="top-gap" id="interest-tags">
           <h3>Interest tags</h3>
           <div className="interest-grid">
             {currentUser.interests.map((interest) => (
