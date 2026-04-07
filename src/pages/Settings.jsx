@@ -1,9 +1,15 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { categories, eventSizes } from '../data/categories';
 import { useApp } from '../context/AppContext';
 
+function formatReminderLabel(time) {
+  if (!time) return '';
+  return time.replace(/^1 hour before$/i, '1 hour notice').replace(/^1 day before$/i, '1 day notice');
+}
+
 export default function Settings() {
-  const { currentUser, reminders, updateUserSettings } = useApp();
+  const { currentUser, reminders, events, updateUserSettings, showToast } = useApp();
   const [preferredSize, setPreferredSize] = useState(currentUser.preferredSize);
   const [interests, setInterests] = useState(currentUser.interests);
 
@@ -15,6 +21,7 @@ export default function Settings() {
 
   const handleSave = () => {
     updateUserSettings({ preferredSize, interests });
+    showToast('Settings saved. Recommendations will follow these preferences.');
   };
 
   return (
@@ -56,10 +63,20 @@ export default function Settings() {
           {Object.keys(reminders).length === 0 ? (
             <p className="muted">No reminders have been set yet.</p>
           ) : (
-            <ul className="plain-list">
-              {Object.entries(reminders).map(([eventId, value]) => (
-                <li key={eventId}>{eventId}: {value}</li>
-              ))}
+            <ul className="plain-list reminder-list">
+              {Object.entries(reminders).map(([eventId, value]) => {
+                const linked = events.find((item) => item.id === eventId);
+                const eventTitle = linked?.title || 'Event';
+                const reminderShort = formatReminderLabel(value);
+                return (
+                  <li key={eventId}>
+                    <Link className="text-link" to={`/event/${eventId}`}>
+                      {eventTitle}
+                    </Link>
+                    <span className="muted"> — {reminderShort}</span>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
