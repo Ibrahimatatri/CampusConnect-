@@ -4,9 +4,18 @@ import { categories, eventSizes } from '../data/categories';
 import { buildings } from '../data/buildings';
 import { useApp } from '../context/AppContext';
 
+const emptyErrors = {
+  title: '',
+  description: '',
+  date: '',
+  time: '',
+  location: ''
+};
+
 export default function CreateEvent() {
   const navigate = useNavigate();
-  const { createEvent, currentUser } = useApp();
+  const { createEvent, currentUser, showToast } = useApp();
+  const [errors, setErrors] = useState(emptyErrors);
 
   const [form, setForm] = useState({
     title: '',
@@ -27,16 +36,36 @@ export default function CreateEvent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const title = form.title.trim();
+    const description = form.description.trim();
+    const date = form.date.trim();
+    const time = form.time.trim();
+    const location = form.location.trim();
+
+    const nextErrors = { ...emptyErrors };
+    if (title.length < 3) nextErrors.title = 'Add a clear title (at least 3 characters).';
+    if (description.length < 10) nextErrors.description = 'Add a short description (at least 10 characters) so people know what to expect.';
+    if (date.length < 2) nextErrors.date = 'Add a date (for example Apr 18 or 2026-04-18).';
+    if (time.length < 2) nextErrors.time = 'Add a time so attendees know when to show up.';
+    if (location.length < 2) nextErrors.location = 'Add a room, area, or meeting link.';
+
+    const hasError = Object.values(nextErrors).some(Boolean);
+    setErrors(nextErrors);
+    if (hasError) {
+      showToast('Fix the highlighted fields before posting.');
+      return;
+    }
+
     const newEvent = {
       id: `e${Date.now()}`,
-      title: form.title,
+      title,
       category: form.category,
       size: form.size,
-      date: form.date || 'TBD',
-      time: form.time || 'TBD',
-      location: form.location,
+      date,
+      time,
+      location,
       building: form.building,
-      description: `${form.description}${form.note ? ` What to bring: ${form.note}.` : ''}`,
+      description: `${description}${form.note.trim() ? ` What to bring: ${form.note.trim()}.` : ''}`,
       audience: form.visibility,
       attendeeCount: 1,
       host: `${currentUser.name} · Student-led`,
@@ -45,6 +74,7 @@ export default function CreateEvent() {
     };
 
     createEvent(newEvent);
+    showToast('Event posted. It now appears on the home feed.');
     navigate('/home');
   };
 
@@ -53,12 +83,25 @@ export default function CreateEvent() {
       <section className="panel form-panel">
         <h1>Create a Student Event</h1>
         <p className="muted">Keep it simple. A quick study session or hangout is enough.</p>
-        <form className="stack-form" onSubmit={handleSubmit}>
-          <label>Title</label>
-          <input value={form.title} onChange={(e) => handleChange('title', e.target.value)} required />
+        <form className="stack-form" noValidate onSubmit={handleSubmit}>
+          <label htmlFor="create-title">Title</label>
+          <input
+            id="create-title"
+            value={form.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            aria-invalid={Boolean(errors.title)}
+          />
+          {errors.title ? <p className="field-error">{errors.title}</p> : null}
 
-          <label>Description</label>
-          <textarea value={form.description} onChange={(e) => handleChange('description', e.target.value)} required />
+          <label htmlFor="create-description">Description</label>
+          <textarea
+            id="create-description"
+            value={form.description}
+            onChange={(e) => handleChange('description', e.target.value)}
+            aria-invalid={Boolean(errors.description)}
+          />
+          {errors.description ? <p className="field-error">{errors.description}</p> : null}
+          <p className="hint">Explain what will happen, who it is for, and anything guests should know.</p>
 
           <div className="two-col">
             <div>
@@ -77,12 +120,28 @@ export default function CreateEvent() {
 
           <div className="two-col">
             <div>
-              <label>Date</label>
-              <input type="text" placeholder="Apr 18" value={form.date} onChange={(e) => handleChange('date', e.target.value)} required />
+              <label htmlFor="create-date">Date</label>
+              <input
+                id="create-date"
+                type="text"
+                placeholder="Apr 18"
+                value={form.date}
+                onChange={(e) => handleChange('date', e.target.value)}
+                aria-invalid={Boolean(errors.date)}
+              />
+              {errors.date ? <p className="field-error">{errors.date}</p> : null}
             </div>
             <div>
-              <label>Time</label>
-              <input type="text" placeholder="6:00 PM" value={form.time} onChange={(e) => handleChange('time', e.target.value)} required />
+              <label htmlFor="create-time">Time</label>
+              <input
+                id="create-time"
+                type="text"
+                placeholder="6:00 PM"
+                value={form.time}
+                onChange={(e) => handleChange('time', e.target.value)}
+                aria-invalid={Boolean(errors.time)}
+              />
+              {errors.time ? <p className="field-error">{errors.time}</p> : null}
             </div>
           </div>
 
@@ -94,8 +153,14 @@ export default function CreateEvent() {
               </select>
             </div>
             <div>
-              <label>Room or location</label>
-              <input value={form.location} onChange={(e) => handleChange('location', e.target.value)} required />
+              <label htmlFor="create-location">Room or location</label>
+              <input
+                id="create-location"
+                value={form.location}
+                onChange={(e) => handleChange('location', e.target.value)}
+                aria-invalid={Boolean(errors.location)}
+              />
+              {errors.location ? <p className="field-error">{errors.location}</p> : null}
             </div>
           </div>
 
