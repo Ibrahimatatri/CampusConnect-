@@ -5,7 +5,8 @@ import { useApp } from '../context/AppContext';
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const { completeOnboarding } = useApp();
+  const { completeOnboarding, currentUser, showToast } = useApp();
+  const [displayName, setDisplayName] = useState(currentUser.name);
   const [selectedInterests, setSelectedInterests] = useState(['Tech', 'Study']);
   const [preferredSize, setPreferredSize] = useState('Small');
 
@@ -16,7 +17,13 @@ export default function Onboarding() {
   };
 
   const handleFinish = () => {
-    completeOnboarding({ interests: selectedInterests, preferredSize });
+    const name = displayName.trim() || currentUser.name;
+    completeOnboarding({
+      interests: selectedInterests,
+      preferredSize,
+      name
+    });
+    showToast('Preferences saved. You are ready to explore events.');
     navigate('/home');
   };
 
@@ -25,6 +32,15 @@ export default function Onboarding() {
       <div className="auth-card wide-card">
         <h2>Set your preferences</h2>
         <p className="muted">This helps us show you more relevant events.</p>
+        <label htmlFor="display-name">What should we call you?</label>
+        <input
+          id="display-name"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="Name or nickname"
+          autoComplete="name"
+        />
+        <p className="hint">We use this on your home screen and profile so it matches who is signed in.</p>
         <div className="interest-grid">
           {categories.map((category) => (
             <button
