@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { initialEvents } from '../data/events';
 import { currentUserSeed, sampleParticipants } from '../data/users';
 
@@ -11,8 +11,26 @@ export function AppProvider({ children }) {
   const [savedEventIds, setSavedEventIds] = useState([]);
   const [joinedEventIds, setJoinedEventIds] = useState([]);
   const [reminders, setReminders] = useState({});
+  const [toastMessage, setToastMessage] = useState(null);
 
-  const login = () => setIsLoggedIn(true);
+  const showToast = useCallback((message) => {
+    setToastMessage(message);
+  }, []);
+
+  const dismissToast = useCallback(() => setToastMessage(null), []);
+
+  const login = (email) => {
+    setIsLoggedIn(true);
+    const localPart = (email || '').trim().split('@')[0] || '';
+    const derived = localPart
+      ? localPart.replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      : '';
+    setCurrentUser((prev) => ({
+      ...prev,
+      name: derived || prev.name || 'Student'
+    }));
+  };
+
   const logout = () => setIsLoggedIn(false);
 
   const completeOnboarding = (preferences) => {
@@ -61,6 +79,11 @@ export function AppProvider({ children }) {
     [events, savedEventIds]
   );
 
+  const joinedEvents = useMemo(
+    () => events.filter((event) => joinedEventIds.includes(event.id)),
+    [events, joinedEventIds]
+  );
+
   const value = {
     isLoggedIn,
     currentUser,
@@ -68,9 +91,12 @@ export function AppProvider({ children }) {
     savedEventIds,
     joinedEventIds,
     reminders,
+    toastMessage,
     participantsDirectory: sampleParticipants,
     login,
     logout,
+    showToast,
+    dismissToast,
     completeOnboarding,
     saveEvent,
     unsaveEvent,
@@ -78,7 +104,8 @@ export function AppProvider({ children }) {
     setReminderForEvent,
     createEvent,
     updateUserSettings,
-    savedEvents
+    savedEvents,
+    joinedEvents
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
