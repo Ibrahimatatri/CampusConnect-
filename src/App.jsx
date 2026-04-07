@@ -11,6 +11,8 @@ import CreateEvent from './pages/CreateEvent';
 import SavedEvents from './pages/SavedEvents';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import JoinedEvents from './pages/JoinedEvents';
+import Toast from './components/Toast';
 import { useApp } from './context/AppContext';
 
 function ProtectedRoute({ children }) {
@@ -20,10 +22,12 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   const location = useLocation();
+  const { toastMessage, dismissToast } = useApp();
   const hideNav = ['/', '/login', '/onboarding'].includes(location.pathname);
 
   return (
     <div className="app-shell">
+      <Toast message={toastMessage} onDismiss={dismissToast} />
       {!hideNav && <Navbar />}
       <Routes>
         <Route path="/" element={<Welcome />} />
@@ -75,6 +79,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <SavedEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/joined"
+          element={
+            <ProtectedRoute>
+              <JoinedEvents />
             </ProtectedRoute>
           }
         />
