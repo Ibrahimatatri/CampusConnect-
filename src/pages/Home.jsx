@@ -33,7 +33,11 @@ export default function Home() {
     <div className="page-wrap">
       <section className="hero-strip">
         <div>
-          <h1>Welcome back, {currentUser.name}</h1>
+          <h1>
+            {currentUser.name && currentUser.name !== 'Student'
+              ? `Welcome back, ${currentUser.name}`
+              : 'Welcome back'}
+          </h1>
           <p className="muted">Discover events that fit your interests and feel easier to join.</p>
         </div>
         <div className="hero-actions">
