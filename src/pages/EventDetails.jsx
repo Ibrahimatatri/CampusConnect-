@@ -13,7 +13,8 @@ export default function EventDetails() {
     joinEvent,
     joinedEventIds,
     reminders,
-    setReminderForEvent
+    setReminderForEvent,
+    showToast
   } = useApp();
 
   const [showReminder, setShowReminder] = useState(false);
@@ -27,6 +28,7 @@ export default function EventDetails() {
   const handleReminderSelect = (option) => {
     setReminderForEvent(event.id, option);
     setShowReminder(false);
+    showToast(`Reminder set: “${event.title}” · ${option}`);
   };
 
   return (
@@ -39,10 +41,30 @@ export default function EventDetails() {
             <p className="muted">Hosted by {event.host}</p>
           </div>
           <div className="button-row wrap-row">
-            <button className="secondary-btn" onClick={() => (isSaved ? unsaveEvent(event.id) : saveEvent(event.id))}>
+            <button
+              className="secondary-btn"
+              onClick={() => {
+                if (isSaved) {
+                  unsaveEvent(event.id);
+                  showToast('Removed this event from saved.');
+                } else {
+                  saveEvent(event.id);
+                  showToast('Saved. Find it anytime under Saved Events.');
+                }
+              }}
+            >
               {isSaved ? 'Saved' : 'Save Event'}
             </button>
-            <button className="primary-btn" onClick={() => joinEvent(event.id)}>
+            <button
+              className="primary-btn"
+              onClick={() => {
+                if (!isJoined) {
+                  joinEvent(event.id);
+                  showToast(`You joined “${event.title}”.`);
+                }
+              }}
+              disabled={isJoined}
+            >
               {isJoined ? 'Joined' : 'Join Event'}
             </button>
           </div>
@@ -62,7 +84,9 @@ export default function EventDetails() {
             <h3>What to expect</h3>
             <p>{event.description}</p>
             <p className="muted small">
-              {reminders[event.id] ? `Reminder set: ${reminders[event.id]}` : 'No reminder set yet.'}
+              {reminders[event.id]
+                ? `Reminder: ${event.title} · ${reminders[event.id]}`
+                : 'No reminder set yet.'}
             </p>
           </div>
         </div>
@@ -76,6 +100,7 @@ export default function EventDetails() {
 
       <ReminderModal
         open={showReminder}
+        eventTitle={event.title}
         onClose={() => setShowReminder(false)}
         onSelect={handleReminderSelect}
       />
