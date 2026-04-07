@@ -17,6 +17,7 @@ export default function Navbar() {
         <NavLink to="/home">Home</NavLink>
         <NavLink to="/create">Create Event</NavLink>
         <NavLink to="/saved">Saved</NavLink>
+        <NavLink to="/joined">Joined</NavLink>
         <NavLink to="/profile">Profile</NavLink>
         <NavLink to="/settings">Settings</NavLink>
         <button className="ghost-btn" onClick={handleLogout}>Log Out</button>
