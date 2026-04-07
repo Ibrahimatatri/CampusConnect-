@@ -1,6 +1,6 @@
 export const currentUserSeed = {
   id: 'u1',
-  name: 'Ibrahim',
+  name: 'Student',
   major: 'Software Engineering',
   year: 'Junior',
   interests: ['Tech', 'Study', 'Social'],
